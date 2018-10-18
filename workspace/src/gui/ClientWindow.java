@@ -217,8 +217,8 @@ public class ClientWindow extends Application {
 					
 		});
 		
-		String host_name = NetworkConnection.instance().HOSTNAME;
-		String host_port = NetworkConnection.instance().PORT;
+		String host_name = NetworkConnection.instance().getHOSTNAME();
+		String host_port = NetworkConnection.instance().getPORT();
 
 		client_ip_input = new TextField(host_name);
 		client_ip_input.setDisable(true);

@@ -7,34 +7,81 @@
 
 package connection;
 
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 /**
- * Course: 				ICS 460 Networks And Security
- * Project Description: A project uses UDP protocol to send and a receive a binary file.
- * 						The sender accepts a file as a command line parameter (any binary 
- * 						file on your hard disk), breaks it into smaller chunks.
- * Class Description: 	A Singleton class to create  secure connection
- * Instructor: 			Professor Demodar Chetty
+ * Course: ICS 460 Networks And Security Project Description: A project uses UDP
+ * protocol to send and a receive a binary file. The sender accepts a file as a
+ * command line parameter (any binary file on your hard disk), breaks it into
+ * smaller chunks. Class Description: A Singleton class to create secure
+ * connection Instructor: Professor Demodar Chetty
+ * 
  * @author Natnael Alemayehu
  *
  */
 public final class NetworkConnection {
-	
-	private static NetworkConnection networkConn;
-	public final String HOSTNAME;
-	public final String PORT;
-	
-	//A private constructor to restrict instantiation outside this class
-	private NetworkConnection(){
-		this.PORT = "211";
-		this.HOSTNAME = "127.0.2.1";
-	};
 
-	//A public method for to instancing the port number and host name
+	private static NetworkConnection networkConn;
+	private String HOSTNAME;
+	private String PORT;
+	private DatagramSocket socket;
+
+	// A private constructor to restrict instantiation outside this class	
+	private NetworkConnection() {
+		setHOSTNAME(HOSTNAME);
+		setPORT(PORT);
+	}
+
+	// A public method for to instancing the port number and host name
 	public static NetworkConnection instance() {
-		if(networkConn == null)
-			networkConn = new NetworkConnection();	
+		if (networkConn == null)
+			networkConn = new NetworkConnection();
 		return networkConn;
 	}
-	
+
+	public DatagramSocket getConnection() {
+		try {
+
+			// create udp socket connection
+			socket = new DatagramSocket();
+
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return socket;
+	}
+
+	/**
+	 * @return the hOSTNAME
+	 */
+	public String getHOSTNAME() {
+		return HOSTNAME;
+	}
+
+	/**
+	 * @param hOSTNAME the hOSTNAME to set
+	 */
+	public void setHOSTNAME(String hostname) {
+		HOSTNAME = hostname;
+	}
+
+	/**
+	 * @return the pORT
+	 */
+	public String getPORT() {
+		return PORT;
+	}
+
+	/**
+	 * @param pORT the pORT to set
+	 */
+	public void setPORT(String port) {
+		PORT = port;
+	}
+
 }
