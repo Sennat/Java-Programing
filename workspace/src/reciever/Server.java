@@ -19,12 +19,12 @@ public class Server {
 
 	public final static Logger errors = Logger.getLogger("errors");
 	private static final int SEQUENCE_NUMBER = 0;
-	private final static int BUFFER_SIZE = 65535;
-	private final int PORT = 423;
-	private byte[] data_in = null;
-	private byte[] data_out = null;
+	private final static int BUFFER_SIZE = 100;
+	private final static int PORT = 423;
+	private static byte[] data_in = null;
+	private static byte[] data_out = null;
 
-	public byte[] receivedData() {
+	public static byte[] receivedData() {
 
 		// Display server status
 		System.out.println("+ ============================================ +");
@@ -34,7 +34,6 @@ public class Server {
 		// Display server status
 		System.out.println("The server is ready about to start receiving pakets ....");
 
-		
 		// Connection
 		try (DatagramSocket server_socket = new DatagramSocket(PORT)) {
 
@@ -50,7 +49,7 @@ public class Server {
 				DatagramPacket receive_packet = new DatagramPacket(data_in, data_in.length);
 				server_socket.receive(receive_packet);
 				InetAddress host_ip = receive_packet.getAddress();
-				System.out.println("\nServer connected to ...... " + host_ip + "\n");
+				//System.out.println("\nServer connected to ...... " + host_ip + "\n");
 				int port = receive_packet.getPort();
 
 				long timestamp = System.currentTimeMillis();
@@ -58,22 +57,21 @@ public class Server {
 				Random random = new Random();
 				int probablity = random.nextInt(50);
 
-				// Retrieve packet info to send response to same sender
-				String message = new String(receive_packet.getData(), 0, receive_packet.getLength());
-				message = message.toUpperCase();
-				data_out = message.getBytes();
-				System.out.println("PACKET RECEIVED: \n" + message);
 				//data_out = message.getBytes();
-				
+				//System.out.println("PACKET RECEIVED: \n" + message);
+
 				// 50% chance of responding to the message
 				if (((probablity % 2) == 0)) {
-
+					// Send acknowledgement response to the sender
 					String acknowledgment = new String("ACKNOWLEDGEMENT RECEIVED FOR: ");
-					String result = new String(
-							"\nRECEIVED  PACKET SEQUENCE #:\t" + squence_num + "\tTIME STAMP:\t" + timestamp);
-					data_out = result.getBytes();
 					data_out = acknowledgment.getBytes();
 					
+					// Retrieve packet info to send response to same sender
+					String message = new String(receive_packet.getData(), 0, receive_packet.getLength());
+					String result = new String(
+							"\nRECEIVED  PACKET SEQUENCE #:\t" + squence_num + "\nPACKET RECEIVED: \n" + message);
+					data_out = result.getBytes();
+
 					// Send response packet to sender
 					DatagramPacket send_packet = new DatagramPacket(data_out, data_out.length, host_ip, port);
 					server_socket.send(send_packet);
@@ -90,7 +88,7 @@ public class Server {
 
 				}
 
-				//server_socket.close();
+				// server_socket.close();
 
 			}
 
@@ -100,6 +98,11 @@ public class Server {
 
 		return data_in;
 
+	}
+
+	public static void main(String[] args) {
+
+		receivedData();
 	}
 
 }

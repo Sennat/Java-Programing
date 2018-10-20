@@ -26,7 +26,7 @@ public class Client {
 	private static List<byte[]> bytes_list = new ArrayList<>();
 	private final static String HOSTNAME = "127.0.0.1";
 	private static final int SEQUENCE_NUMBER = -1;
-	private final static int BUFFER_SIZE = 65535;
+	private final static int BUFFER_SIZE = 100;
 	private final static int PORT = 423;
 
 	public static void sendData() {
@@ -110,10 +110,10 @@ public class Client {
 		}
 
 	}
-	/*
+	
 	public static void main(String[] args) {
 
 		sendData();
-	}*/
+	}
 
 }
