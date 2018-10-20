@@ -27,13 +27,13 @@ public final class NetworkConnection {
 
 	private static NetworkConnection networkConn;
 	private String HOSTNAME;
-	private String PORT;
+	private Integer PORT;
 	private DatagramSocket socket;
 
 	// A private constructor to restrict instantiation outside this class	
 	private NetworkConnection() {
-		setHOSTNAME(HOSTNAME);
-		setPORT(PORT);
+		this.HOSTNAME = "127.0.0.1";
+		this.PORT = Integer.valueOf("423");
 	}
 
 	// A public method for to instancing the port number and host name
@@ -47,7 +47,9 @@ public final class NetworkConnection {
 		try {
 
 			// create udp socket connection
-			socket = new DatagramSocket();
+			socket = new DatagramSocket(0);
+			//socket.setSendBufferSize(1024);
+			socket.setSoTimeout(1000);
 
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
@@ -73,14 +75,14 @@ public final class NetworkConnection {
 	/**
 	 * @return the pORT
 	 */
-	public String getPORT() {
+	public Integer getPORT() {
 		return PORT;
 	}
 
 	/**
 	 * @param pORT the pORT to set
 	 */
-	public void setPORT(String port) {
+	public void setPORT(Integer port) {
 		PORT = port;
 	}
 

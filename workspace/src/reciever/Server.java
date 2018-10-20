@@ -11,53 +11,94 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-abstract class Server {
+public class Server {
 
-	private DatagramPacket send_packet, receive_packet;
-	private DatagramSocket socket;
-	private InetAddress ip_address;
-	private int port;
+	public final static Logger errors = Logger.getLogger("errors");
+	private static final int SEQUENCE_NUMBER = 0;
+	private final static int BUFFER_SIZE = 65535;
+	private final int PORT = 423;
+	private byte[] data_in = null;
+	private byte[] data_out = null;
 
-	private byte[] sendData() {
+	public byte[] receivedData() {
 
-		// create buffers to process data
-		byte[] data_out = new byte[1024];
-		byte[] data_in = new byte[1024];
+		// Display server status
+		System.out.println("+ ============================================ +");
+		System.out.println("\t\tServer Started");
+		System.out.println("+ ============================================ +");
 
-		try {
-			// receive packet
-			receive_packet = new DatagramPacket(data_in, data_in.length);
+		// Display server status
+		System.out.println("The server is ready about to start receiving pakets ....");
 
-			// connection
-			socket = new DatagramSocket();
-			socket.receive(receive_packet);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		// Connection
+		try (DatagramSocket server_socket = new DatagramSocket(PORT)) {
+
+			// Create buffers to process data
+			data_out = new byte[BUFFER_SIZE];
+			data_in = new byte[BUFFER_SIZE];
+			int squence_num = SEQUENCE_NUMBER;
+
+			while (true) {
+				squence_num++;
+
+				// Receive packet
+				DatagramPacket receive_packet = new DatagramPacket(data_in, data_in.length);
+				server_socket.receive(receive_packet);
+				InetAddress host_ip = receive_packet.getAddress();
+				System.out.println("\nServer connected to ...... " + host_ip + "\n");
+				int port = receive_packet.getPort();
+
+				long timestamp = System.currentTimeMillis();
+
+				Random random = new Random();
+				int probablity = random.nextInt(50);
+
+				// Retrieve packet info to send response to same sender
+				String message = new String(receive_packet.getData(), 0, receive_packet.getLength());
+				message = message.toUpperCase();
+				data_out = message.getBytes();
+				System.out.println("PACKET RECEIVED: \n" + message);
+				//data_out = message.getBytes();
+				
+				// 50% chance of responding to the message
+				if (((probablity % 2) == 0)) {
+
+					String acknowledgment = new String("ACKNOWLEDGEMENT RECEIVED FOR: ");
+					String result = new String(
+							"\nRECEIVED  PACKET SEQUENCE #:\t" + squence_num + "\tTIME STAMP:\t" + timestamp);
+					data_out = result.getBytes();
+					data_out = acknowledgment.getBytes();
+					
+					// Send response packet to sender
+					DatagramPacket send_packet = new DatagramPacket(data_out, data_out.length, host_ip, port);
+					server_socket.send(send_packet);
+					break;
+
+				} else {
+
+					String drop_msg = new String("MESSAGE FOR DROPPED PACKETS: ");
+					String drop_packets = new String(
+							"DROPPED  PACKET SEQUENCE #:\t" + squence_num + "\tTIME STAMP:\t" + timestamp);
+					data_out = drop_msg.getBytes();
+					data_out = drop_packets.getBytes();
+					squence_num--;
+
+				}
+
+				//server_socket.close();
+
+			}
+
+		} catch (IOException | RuntimeException ex) {
+			errors.log(Level.SEVERE, ex.getMessage(), ex);
 		}
 
-		// display receive
-		System.out.println("Packet Received!");
-
-		// retrieve packet info to send response to same sender
-		ip_address = receive_packet.getAddress();
-		port = receive_packet.getPort();
-
-		// process data
-		String temp = new String(receive_packet.getData());
-		temp = temp.toUpperCase();
-		data_out = temp.getBytes();
-
-		try {
-			// send response packet to sender
-			send_packet = new DatagramPacket(data_out, data_out.length, ip_address, port);
-			socket.send(send_packet);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
+		return data_in;
 
 	}
 

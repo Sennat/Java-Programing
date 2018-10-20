@@ -7,24 +7,25 @@
 
 package file_processor;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 
 public class DataSender implements FileLoader {
 
-	private String file_name;
-	private byte[] data_in = new byte[1024];
+	private List<byte[]> listof_arrays = new ArrayList<>();
+	private ByteArrayOutputStream bytearray_stream;
 	private FileInputStream file_input_stream;
+	private String file_name;
 
 	@Override
-	public byte[] loadFile() {
-
+	public List<byte[]> loadFile() {
 		JFileChooser file_Chooser = new JFileChooser();
 		file_Chooser.setCurrentDirectory(new File("."));
 
@@ -34,11 +35,15 @@ public class DataSender implements FileLoader {
 			try {
 				// get a file from user
 				File file = new File(file_name);
-
-				// read file into bytes[]
-				file_input_stream = new FileInputStream(file);
-				data_in = new byte[(int) file.length()];
-				file_input_stream.read(data_in);
+					// read file into bytes[]
+					file_input_stream = new FileInputStream(file);
+					bytearray_stream = new ByteArrayOutputStream();
+					byte[] buffer = new byte[1024];
+					int readNum = 0;
+						while ((readNum = file_input_stream.read(buffer)) != -1) {
+							bytearray_stream.write(buffer, 0, readNum);
+							listof_arrays.add(bytearray_stream.toByteArray());
+						}
 
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
@@ -56,7 +61,8 @@ public class DataSender implements FileLoader {
 				}
 			}
 		}
-		return data_in;
+
+		return listof_arrays;
 
 	}
 }
