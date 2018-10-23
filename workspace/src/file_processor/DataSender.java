@@ -13,19 +13,25 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JFileChooser;
 
+import packet.Packet;
+
 public class DataSender implements FileLoader {
 
-	private List<byte[]> listof_arrays = new ArrayList<>();
 	private ByteArrayOutputStream bytearray_stream;
+	private byte[] buffer = new byte[128];
 	private FileInputStream file_input_stream;
 	private String file_name;
+	private Map<Integer, byte[]> bytes_array;
 
 	@Override
-	public List<byte[]> loadFile() {
+	public byte[] loadFile() {
 		JFileChooser file_Chooser = new JFileChooser();
 		file_Chooser.setCurrentDirectory(new File("."));
 
@@ -38,11 +44,16 @@ public class DataSender implements FileLoader {
 					// read file into bytes[]
 					file_input_stream = new FileInputStream(file);
 					bytearray_stream = new ByteArrayOutputStream();
-					byte[] buffer = new byte[1024];
 					int readNum = 0;
 						while ((readNum = file_input_stream.read(buffer)) != -1) {
 							bytearray_stream.write(buffer, 0, readNum);
-							listof_arrays.add(bytearray_stream.toByteArray());
+							buffer = bytearray_stream.toByteArray();
+
+/*							// For debugging purpose
+							for(Entry<Integer, byte[]> entry : bytes_array.entrySet()) {
+								System.out.println("Key = " + entry.getKey() + 
+				                        ", Value = " + entry.getValue());
+							}*/
 						}
 
 			} catch (FileNotFoundException e) {
@@ -62,7 +73,7 @@ public class DataSender implements FileLoader {
 			}
 		}
 
-		return listof_arrays;
+		return buffer;
 
 	}
 }

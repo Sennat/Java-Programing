@@ -7,10 +7,8 @@
 
 package file_processor;
 
-import java.util.List;
-
 public interface FileLoader {
 	
-	public List<byte[]> loadFile();
+	public byte[] loadFile();
 
 }

@@ -10,8 +10,6 @@ package reciever;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,84 +17,55 @@ public class Server {
 
 	public final static Logger errors = Logger.getLogger("errors");
 	private static final int SEQUENCE_NUMBER = 0;
-	private final static int BUFFER_SIZE = 100;
+	private final static int BUFFER_SIZE = 128;
 	private final static int PORT = 423;
-	private static byte[] data_in = null;
-	private static byte[] data_out = null;
 
-	public static byte[] receivedData() {
+	public static void receivedData() {
 
 		// Display server status
 		System.out.println("+ ============================================ +");
-		System.out.println("\t\tServer Started");
+		System.out.println("\t\t~ Server Started ~");
 		System.out.println("+ ============================================ +");
 
 		// Display server status
-		System.out.println("The server is ready about to start receiving pakets ....");
+		System.out.println("The server is ready, waiting for incoming data...");
 
 		// Connection
-		try (DatagramSocket server_socket = new DatagramSocket(PORT)) {
+		try (DatagramSocket socket = new DatagramSocket(PORT)) {
+			// Create buffers to incoming data
+			byte[] data_in = new byte[BUFFER_SIZE];
 
-			// Create buffers to process data
-			data_out = new byte[BUFFER_SIZE];
-			data_in = new byte[BUFFER_SIZE];
+			// Receive packet
+			DatagramPacket receive_packet = new DatagramPacket(data_in, data_in.length);
+
 			int squence_num = SEQUENCE_NUMBER;
 
 			while (true) {
+				socket.receive(receive_packet);
+
+				byte[] data_out = receive_packet.getData();
+
+				String message = new String(data_out, 0, receive_packet.getLength());
+				System.out.println("\nRECEIVED PACKET: " + message + "\n");
+
+				// Retrieve packet info and send acknowledgement response to the sender
+				String reply = new String("\nDATA ACKNOWLEDGEMENT RECEIVED FOR PACKET SEQUENCE #: SEQ-"
+						+ squence_num + "\nRECEIVED DATA: \n" + message + "\n");
+				System.out.println("\nDATA ACKNOWLEDGEMENT SENT FOR PACKET SEQUENCE #: SEQ-" + squence_num);
 				squence_num++;
 
-				// Receive packet
-				DatagramPacket receive_packet = new DatagramPacket(data_in, data_in.length);
-				server_socket.receive(receive_packet);
-				InetAddress host_ip = receive_packet.getAddress();
-				//System.out.println("\nServer connected to ...... " + host_ip + "\n");
-				int port = receive_packet.getPort();
-
-				long timestamp = System.currentTimeMillis();
-
-				Random random = new Random();
-				int probablity = random.nextInt(50);
-
-				//data_out = message.getBytes();
-				//System.out.println("PACKET RECEIVED: \n" + message);
-
-				// 50% chance of responding to the message
-				if (((probablity % 2) == 0)) {
-					// Send acknowledgement response to the sender
-					String acknowledgment = new String("ACKNOWLEDGEMENT RECEIVED FOR: ");
-					data_out = acknowledgment.getBytes();
-					
-					// Retrieve packet info to send response to same sender
-					String message = new String(receive_packet.getData(), 0, receive_packet.getLength());
-					String result = new String(
-							"\nRECEIVED  PACKET SEQUENCE #:\t" + squence_num + "\nPACKET RECEIVED: \n" + message);
-					data_out = result.getBytes();
-
-					// Send response packet to sender
-					DatagramPacket send_packet = new DatagramPacket(data_out, data_out.length, host_ip, port);
-					server_socket.send(send_packet);
-					break;
-
-				} else {
-
-					String drop_msg = new String("MESSAGE FOR DROPPED PACKETS: ");
-					String drop_packets = new String(
-							"DROPPED  PACKET SEQUENCE #:\t" + squence_num + "\tTIME STAMP:\t" + timestamp);
-					data_out = drop_msg.getBytes();
-					data_out = drop_packets.getBytes();
-					squence_num--;
-
-				}
-
-				// server_socket.close();
+				// Send response packet to sender
+				DatagramPacket send_packet = new DatagramPacket(reply.getBytes(), reply.getBytes().length,
+						receive_packet.getAddress(), receive_packet.getPort());
+				socket.send(send_packet);
 
 			}
 
 		} catch (IOException | RuntimeException ex) {
 			errors.log(Level.SEVERE, ex.getMessage(), ex);
+			System.out.println("unable to open ");
+			System.exit(1);
 		}
-
-		return data_in;
 
 	}
 
