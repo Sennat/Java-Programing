@@ -12,68 +12,83 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.swing.JFileChooser;
 
-import packet.Packet;
-
 public class DataSender implements FileLoader {
 
-	private ByteArrayOutputStream bytearray_stream;
-	private byte[] buffer = new byte[128];
-	private FileInputStream file_input_stream;
-	private String file_name;
-	private Map<Integer, byte[]> bytes_array;
+	private static ByteArrayOutputStream bytearray_stream;
+	private static FileInputStream file_input_stream;
+	private static byte[] buffer= null;
+	private static String file_name;
 
 	@Override
 	public byte[] loadFile() {
+		
 		JFileChooser file_Chooser = new JFileChooser();
+		file_Chooser.setDialogTitle("Open File From Current Directory");
 		file_Chooser.setCurrentDirectory(new File("."));
 
 		if (file_Chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 			file_name = file_Chooser.getSelectedFile().getName();
 
 			try {
+
+				// Direct file reader with out JFileChooser
+				//File file = new File("C:\\Users\\Natnael\\Programing\\Java Programing\\workspace\\portrait.jpg");
+
 				// get a file from user
 				File file = new File(file_name);
-					// read file into bytes[]
-					file_input_stream = new FileInputStream(file);
-					bytearray_stream = new ByteArrayOutputStream();
-					int readNum = 0;
-						while ((readNum = file_input_stream.read(buffer)) != -1) {
-							bytearray_stream.write(buffer, 0, readNum);
-							buffer = bytearray_stream.toByteArray();
 
-/*							// For debugging purpose
-							for(Entry<Integer, byte[]> entry : bytes_array.entrySet()) {
-								System.out.println("Key = " + entry.getKey() + 
-				                        ", Value = " + entry.getValue());
-							}*/
-						}
+				// Get the size of the file
+				long length = file.length();
+
+				if (length > Integer.MAX_VALUE) {
+
+					// File is too large
+					throw new IOException("File is too large!");
+				}
+
+				// To read it in memory to avoid unnecessary copying
+				buffer = new byte[(int) file.length()];
+
+				// Read file into bytes[]
+				file_input_stream = new FileInputStream(file);
+				bytearray_stream = new ByteArrayOutputStream();
+
+				int read = 0;
+				while ((read = file_input_stream.read(buffer)) != -1) {
+					bytearray_stream.write(buffer, 0, read);
+				}
+
+				buffer = bytearray_stream.toByteArray();
 
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
+
 				if (file_input_stream != null) {
+
 					try {
 						file_input_stream.close();
+
 					} catch (IOException e) {
 						e.printStackTrace();
+
 					}
 				}
 			}
+
+		} else {
+
+			file_Chooser.setEnabled(false);
 		}
 
-		return buffer;
-
+		return buffer;		
 	}
+
 }

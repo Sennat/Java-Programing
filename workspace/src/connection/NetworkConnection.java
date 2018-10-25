@@ -7,11 +7,10 @@
 
 package connection;
 
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
+
+import gui.ClientWindow;
 
 /**
  * Course: ICS 460 Networks And Security Project Description: A project uses UDP
@@ -27,13 +26,14 @@ public final class NetworkConnection {
 
 	private static NetworkConnection networkConn;
 	private String HOSTNAME;
-	private Integer PORT;
-	private DatagramSocket socket;
+	private int PORT;
+	private DatagramSocket socket = null;
 
 	// A private constructor to restrict instantiation outside this class	
 	private NetworkConnection() {
+		//ClientWindow client_window = new ClientWindow();
 		this.HOSTNAME = "127.0.0.1";
-		this.PORT = Integer.valueOf("423");
+		this.PORT = 425;
 	}
 
 	// A public method for to instancing the port number and host name
@@ -44,18 +44,18 @@ public final class NetworkConnection {
 	}
 
 	public DatagramSocket getConnection() {
-		try {
-
-			// create udp socket connection
-			socket = new DatagramSocket(0);
+		// create udp socket connection
+		try(DatagramSocket socket = new DatagramSocket(0)) {
+			
 			//socket.setSendBufferSize(1024);
-			socket.setSoTimeout(1000);
+			socket.setSoTimeout(3000);
+			return socket;
 
 		} catch (SocketException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return socket;
+		return null;
 	}
 
 	/**
@@ -66,24 +66,11 @@ public final class NetworkConnection {
 	}
 
 	/**
-	 * @param hOSTNAME the hOSTNAME to set
-	 */
-	public void setHOSTNAME(String hostname) {
-		HOSTNAME = hostname;
-	}
-
-	/**
 	 * @return the pORT
 	 */
-	public Integer getPORT() {
+	public int getPORT() {
 		return PORT;
 	}
 
-	/**
-	 * @param pORT the pORT to set
-	 */
-	public void setPORT(Integer port) {
-		PORT = port;
-	}
 
 }

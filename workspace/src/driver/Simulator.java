@@ -25,12 +25,8 @@ public class Simulator {
 			public void run() {
 
 				while (true) {
-
-					// ServerWindow server = new ServerWindow();
-					// ClientWindow client = new ClientWindow();
-					// ServerWindow.main(args);
+					
 					ClientWindow.main(args);
-					updateStatusBar();
 
 					try {
 
@@ -72,16 +68,6 @@ public class Simulator {
 		
 		return progressbar;
 
-	};
-
-	/*
-	 * @Override public void start(Stage stage) throws Exception {
-	 * 
-	 * ServerWindow server = new ServerWindow(); ClientWindow client = new
-	 * ClientWindow(); try { client.start(stage); server.start(stage); } catch
-	 * (Exception e) { // TODO Auto-generated catch block e.printStackTrace(); }
-	 * 
-	 * }
-	 */
+	}
 
 }

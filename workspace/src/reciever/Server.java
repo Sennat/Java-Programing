@@ -10,14 +10,11 @@ package reciever;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Server {
 
-	public final static Logger errors = Logger.getLogger("errors");
 	private static final int SEQUENCE_NUMBER = 0;
-	private final static int BUFFER_SIZE = 128;
+	private final static int BUFFER_SIZE = 1024;
 	private final static int PORT = 423;
 
 	public static void receivedData() {
@@ -62,8 +59,7 @@ public class Server {
 			}
 
 		} catch (IOException | RuntimeException ex) {
-			errors.log(Level.SEVERE, ex.getMessage(), ex);
-			System.out.println("unable to open ");
+			System.out.println("Unable to open connection.");
 			System.exit(1);
 		}
 
